@@ -1,7 +1,8 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
-const userSchema = require('../models/userModel')
+const userSchema = require('../models/userModel');
+const Annonce = require('../models/annonce');  // schema annonce
 
 require('dotenv').config();
 // handel register
@@ -63,5 +64,44 @@ exports.getAllUsers = async(req,res)=>{
        res.status(200).json({msg:"list of all users",result}) 
     } catch (error) {
         res.status(500).json({msg:"can not get the users no token "})
+    }
+}
+
+
+// create annnce
+
+exports.createAnnonce = async(req,res)=>{
+
+    try {
+       const {id} = req.user;  // decodage mte3 token bech ya3tini fi id 
+       const {categorie,price,Types,location,picture}= req.body;
+
+       const newAnnonce = await  new Annonce({categorie,price,Types,location,picture, user: id});
+      newAnnonce.save();
+       res.status(200).json({msg:"annonce created",newAnnonce})
+
+    } catch (error) {
+        res.status(500).json({msg:"can not create this annonce"})
+    }
+}
+
+// get annonce with id 
+
+exports.getAnnonceById = async(req,res)=>{
+    const {id} = req.params;
+    try {
+        const result = await Annonce.findById(id).populate('user')
+        res.status(200).json({msg:"annonce detail",result})
+    } catch (error) {
+      res.status(500).json({msg:"server error"})  
+    }
+}
+exports.getAllAnnonce = async(req,res)=>{
+    
+    try {
+        const result = await Annonce.find({})
+        res.status(200).json({msg:"list of annonces",result})
+    } catch (error) {
+      res.status(500).json({msg:"server error"})  
     }
 }
